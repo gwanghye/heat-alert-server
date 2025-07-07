@@ -1,5 +1,5 @@
-// 사용자 등록 API
-const users = new Map(); // 간단한 메모리 저장소
+// 사용자 등록 API (Gist 데이터베이스 사용)
+import gistDB from '../lib/gist-database.js';
 
 export default async function handler(req, res) {
   // CORS 설정
@@ -21,27 +21,34 @@ export default async function handler(req, res) {
     
     console.log('사용자 등록:', { userId, pushToken: pushToken.substring(0, 20) + '...' });
     
-    // 사용자 데이터 저장
+    // Gist 데이터베이스에 사용자 데이터 저장
     const userData = {
       pushToken,
       settings,
       location,
-      lastUpdate: new Date().toISOString(),
       lastNotification: null,
       active: true
     };
     
-    users.set(userId, userData);
+    const success = await gistDB.registerUser(userId, userData);
     
-    console.log(`총 등록된 사용자 수: ${users.size}`);
+    if (!success) {
+      throw new Error('데이터베이스 저장 실패');
+    }
+    
+    // 통계 정보 가져오기
+    const stats = await gistDB.getStats();
+    
+    console.log(`사용자 등록 완료. 총 등록된 사용자 수: ${stats.totalUsers}`);
     
     res.status(200).json({ 
       success: true, 
       message: '사용자 등록 완료',
-      userCount: users.size
+      userCount: stats.totalUsers,
+      activeUsers: stats.activeUsers
     });
   } catch (error) {
     console.error('등록 오류:', error);
-    res.status(500).json({ error: '서버 오류' });
+    res.status(500).json({ error: '서버 오류: ' + error.message });
   }
 }

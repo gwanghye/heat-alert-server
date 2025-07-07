@@ -16,7 +16,7 @@ jobs:
       run: |
         echo "날씨 체크 API 호출 시작..."
         response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
-          -X GET "https://heat-alert-server.vercel.app/api/check-weather" \
+          -X GET "https://gwanghye-heat-alert-server.vercel.app/api/check-weather" \
           -H "Content-Type: application/json")
         
         http_status=$(echo "$response" | grep "HTTP_STATUS" | cut -d: -f2)

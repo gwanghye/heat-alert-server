@@ -126,8 +126,8 @@ export default async function handler(req, res) {
         
         console.log(`날씨 정보: ${temperature}°C, 체감온도: ${feelsLike}°C, 위험도: ${dangerLevel}`);
         
-        // 주의 이상일 때만 알림 발송
-        if (['주의', '경고', '위험'].includes(dangerLevel)) {
+        // 관심 이상일 때만 알림 발송 (주의에서 관심으로 변경)
+        if (['관심', '주의', '경고', '위험'].includes(dangerLevel)) {
           // Expo Push API 호출
           const pushMessage = {
             to: user.pushToken,

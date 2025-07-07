@@ -1,0 +1,33 @@
+name: Weather Check and Push Notifications
+
+on:
+  schedule:
+    # 30분마다 실행 (UTC 기준)
+    - cron: '*/30 * * * *'
+  # 수동 실행도 가능
+  workflow_dispatch:
+
+jobs:
+  weather-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Call Weather Check API
+      run: |
+        echo "날씨 체크 API 호출 시작..."
+        response=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
+          -X GET "https://heat-alert-server.vercel.app/api/check-weather" \
+          -H "Content-Type: application/json")
+        
+        http_status=$(echo "$response" | grep "HTTP_STATUS" | cut -d: -f2)
+        content=$(echo "$response" | sed '/HTTP_STATUS/d')
+        
+        echo "HTTP Status: $http_status"
+        echo "Response: $content"
+        
+        if [ "$http_status" != "200" ]; then
+          echo "API 호출 실패!"
+          exit 1
+        else
+          echo "API 호출 성공!"
+        fi
